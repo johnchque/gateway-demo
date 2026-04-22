@@ -23,7 +23,7 @@ The agent never sees tools it can't use. Denials are silent and instant.
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) — the GitHub MCP server runs via `ghcr.io/github/github-mcp-server`
-- A GitHub personal access token with `repo` and `workflow` scopes, exported as `GITHUB_TOKEN`
+- A GitHub personal access token with `repo` and `workflow` scopes, exported as `GITHUB_PERSONAL_ACCESS_TOKEN` (or `GITHUB_TOKEN` — the script accepts both)
 - Wombat installed: `npm install -g @usewombat/gateway`
 - [Claude Code](https://claude.ai/code) installed: `npm install -g @anthropic-ai/claude-code`
 
@@ -41,7 +41,7 @@ cd gateway-demo
 **2. Set your GitHub token:**
 
 ```bash
-export GITHUB_TOKEN=your_token_here
+export GITHUB_PERSONAL_ACCESS_TOKEN=your_token_here
 ```
 
 **3. Run Claude Code:**
@@ -50,7 +50,7 @@ export GITHUB_TOKEN=your_token_here
 claude
 ```
 
-The `.claude.json` in this repo wires up Wombat automatically. No other configuration needed — `wombat-demo.sh` detects your fork from the git remote.
+The `.mcp.json` in this repo wires up Wombat automatically. No other configuration needed — `wombat-demo.sh` detects your fork from the git remote.
 
 ---
 
@@ -87,6 +87,25 @@ To use a different repo: `WOMBAT_REPO=owner/repo claude`
 ## Dashboard
 
 Open [http://localhost:7842](http://localhost:7842) while Wombat is running to see every tool call — allowed (green) or denied (red) — in real time.
+
+---
+
+## Scope of coverage
+
+Wombat governs tool calls routed through MCP. If the agent also has bash access, it could use the `gh` CLI directly and bypass Wombat entirely — no permission check, no audit entry.
+
+For full coverage, block `gh` via Claude Code's settings:
+
+```json
+// .claude/settings.json
+{
+  "permissions": {
+    "deny": ["Bash(gh *)"]
+  }
+}
+```
+
+This forces all GitHub operations through the MCP server and keeps Wombat in the loop for everything.
 
 ---
 

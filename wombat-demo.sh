@@ -24,10 +24,9 @@ PERMISSIONS=$(mktemp /tmp/wombat-permissions-XXXXXX)
 trap "rm -f '$PERMISSIONS'" EXIT
 sed "s|{{REPO}}|$REPO|g" "$DEMO_DIR/permissions.template.json" > "$PERMISSIONS"
 
+export GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_PERSONAL_ACCESS_TOKEN:-${GITHUB_TOKEN:-}}
+
 echo "[wombat-demo] repo     → $REPO" >&2
 echo "[wombat-demo] manifest → $PERMISSIONS" >&2
 
-exec wombat \
-  --manifest "$PERMISSIONS" \
-  --upstream github \
-  --agent auto
+exec wombat --manifest "$PERMISSIONS" --upstream github --agent auto
